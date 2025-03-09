@@ -4,11 +4,39 @@ import { useRef, useState, useEffect, Suspense, useCallback } from "react"
 import { Canvas } from "@react-three/fiber"
 import { Sky, Environment } from "@react-three/drei"
 import { Physics } from "@react-three/cannon"
-import { io, type Socket } from "socket.io-client"
+import { io, Socket } from "socket.io-client"
 
 import Game from "./components/game"
 import GameUI from "./components/ui"
 import { levels } from "./data/constants"
+
+// Quick test to verify the server URL is correct
+useEffect(() => {
+  console.log("Server URL:", process.env.NEXT_PUBLIC_SOCKET_SERVER);
+  // Connect to the server
+  const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_SERVER || "http://localhost:3001", {
+    transports: ['websocket'],
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000
+  });
+  
+  newSocket.on("connect", () => {
+    console.log("Connected to server");
+    setIsConnected(true);
+    setPlayerId(newSocket.id);
+  });
+  
+  newSocket.on("connect_error", (error) => {
+    console.error("Connection error:", error);
+    setIsConnected(false);
+  });
+  
+  Socket(newSocket);
+  
+  return () => {
+    newSocket.disconnect();
+  };
+}, []);
 
 // Sound effects (dummy implementation that doesn't actually play sounds)
 const sounds = {
@@ -388,5 +416,13 @@ export default function FPSGame() {
       </div>
     </div>
   )
+}
+
+function setIsConnected(arg0: boolean) {
+  throw new Error("Function not implemented.")
+}
+
+function setPlayerId(id: any) {
+  throw new Error("Function not implemented.")
 }
 
